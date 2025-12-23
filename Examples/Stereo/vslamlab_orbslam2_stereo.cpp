@@ -214,7 +214,7 @@ void LoadImages(const string &pathToSequence, const string &rgb_csv,
     }
 
     // Required headers
-    const std::string header_ts = "ts_" + cam0_name;
+    const std::string header_ts = "ts_" + cam0_name + " (ns)";
     const std::string header_rgb0 = "path_" + cam0_name;
     const std::string header_rgb1 = "path_" + cam1_name;
 
@@ -240,7 +240,7 @@ void LoadImages(const string &pathToSequence, const string &rgb_csv,
         std::string rel_rgb0_path = tokens[rgb0_idx];
         std::string rel_rgb1_path = tokens[rgb1_idx];
 
-        ORB_SLAM2::Seconds t = std::stod(t_str);
+        ORB_SLAM2::Seconds t = static_cast<double>(std::stoll(t_str)) * 1e-9;
 
         timestamps.push_back(t);
         imageFilenames_l.push_back(pathToSequence + "/" + rel_rgb0_path);
