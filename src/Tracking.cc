@@ -1571,23 +1571,26 @@ float Tracking::getStereoRectification(cv::Mat& M1l_, cv::Mat& M2l_, cv::Mat& M1
         getCameraIntrinsics(K1, distCoef1, cam1, calibration);
         cv::Size image_size(cam0["image_dimension"][0].as<int>(), cam0["image_dimension"][1].as<int>()); 
 
-        std::vector<float> T_SC_data_0 = cam0["T_SC"].as<std::vector<float>>();
-        std::vector<float> T_SC_data_1 = cam1["T_SC"].as<std::vector<float>>();
+        std::vector<float> T_BS_data_0 = cam0["T_BS"].as<std::vector<float>>();
+        std::vector<float> T_BS_data_1 = cam1["T_BS"].as<std::vector<float>>();
 
-        cv::Mat T_SC_0(4, 4, CV_32F);
-        cv::Mat T_SC_1(4, 4, CV_32F);
+        cv::Mat T_BS_0(4, 4, CV_32F);
+        cv::Mat T_BS_1(4, 4, CV_32F);
 
-        std::copy(T_SC_data_0.begin(), T_SC_data_0.end(), (float*)T_SC_0.data);
-        std::copy(T_SC_data_1.begin(), T_SC_data_1.end(), (float*)T_SC_1.data);
+        std::copy(T_BS_data_0.begin(), T_BS_data_0.end(), (float*)T_BS_0.data);
+        std::copy(T_BS_data_1.begin(), T_BS_data_1.end(), (float*)T_BS_1.data);
 
-        cv::Mat T = T_SC_1.inv() * T_SC_0;
+        cv::Mat T = T_BS_1.inv() * T_BS_0;
         cv::Mat R = T.rowRange(0,3).colRange(0,3);
         cv::Mat t = T.rowRange(0,3).col(3);
 
         cv::Mat R0,R1,P0,P1,Q;
         cv::stereoRectify(K0, distCoef0, K1, distCoef1, image_size,R, t,
             R0, R1, P0, P1, Q, cv::CALIB_ZERO_DISPARITY, 0.0, image_size);
-
+        
+        std::cout << "Stereo Rectification P0: " << P0 << std::endl;
+        std::cout << "Stereo Rectification P1: " << P1 << std::endl;
+        
         cv::initUndistortRectifyMap(K0,distCoef0,R0,P0,image_size,CV_32F,M1l_,M2l_);
         cv::initUndistortRectifyMap(K1,distCoef1,R1,P1,image_size,CV_32F,M1r_,M2r_);
 
