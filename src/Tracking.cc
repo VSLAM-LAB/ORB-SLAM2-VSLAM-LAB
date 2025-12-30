@@ -1530,8 +1530,22 @@ void Tracking::getCameraIntrinsics(cv::Mat& K, cv::Mat& distCoef, const YAML::No
                 0.0f, 0.0f, 1.0f);
 
     distCoef = cv::Mat::zeros(4,1,CV_32F);
-    if (cam["distortion_type"] && cam["distortion_coefficients"]) {
+    bool hasDistortion = (cam["distortion_type"] && cam["distortion_coefficients"]);
+    if (hasDistortion){
+        std::string dist_type = cam["distortion_type"].as<std::string>();
+        if ((dist_type != "radtan4") && (dist_type != "radtan5")){
+            cout << "[Error] Distortion model '" << dist_type << "' not supported. Terminating!" << endl;        
+            exit(EXIT_FAILURE);
+        }
         std::vector<float> dist_coeffs_vec = cam["distortion_coefficients"].as<std::vector<float>>();
+        if ((dist_type == "radtan4") && (dist_coeffs_vec.size() != 4) ) {
+            cout << "[Error] Distortion model '" << dist_type << "' but num parameters != 4" << endl;
+            exit(EXIT_FAILURE);
+        }
+        if ((dist_type == "radtan5") && (dist_coeffs_vec.size() != 5) ) {
+            cout << "[Error] Distortion model '" << dist_type << "' but num parameters != 5" << endl;
+            exit(EXIT_FAILURE);
+        }
         distCoef = cv::Mat(dist_coeffs_vec.size(), 1, CV_32F, dist_coeffs_vec.data()).clone(); 
     }
 
@@ -1539,13 +1553,14 @@ void Tracking::getCameraIntrinsics(cv::Mat& K, cv::Mat& distCoef, const YAML::No
     cout << "- cam_name: " << cam["cam_name"].as<std::string>() << endl;
     cout << "- cam_type: " << cam["cam_type"].as<std::string>() << endl;
     cout << "- cam_model: " << cam["cam_model"].as<std::string>() << endl;
-    if (cam["distortion_type"] && cam["distortion_coefficients"])
+    if (hasDistortion){
         cout << "- distortion_type: " << cam["distortion_type"].as<std::string>() << endl;
+    }
     cout << "- fx: " << K.at<float>(0,0) << endl;
     cout << "- fy: " << K.at<float>(1,1) << endl;
     cout << "- cx: " << K.at<float>(0,2) << endl;
     cout << "- cy: " << K.at<float>(1,2) << endl;
-    if (cam["distortion_type"] && cam["distortion_coefficients"]){
+    if (hasDistortion){
         cout << "- distortion_coefficients: " << distCoef.t() << endl;
     }
     cout << "- fps: " << cam["fps"].as<float>() << endl;
@@ -1590,7 +1605,7 @@ float Tracking::getStereoRectification(cv::Mat& M1l_, cv::Mat& M2l_, cv::Mat& M1
         
         std::cout << "Stereo Rectification P0: " << P0 << std::endl;
         std::cout << "Stereo Rectification P1: " << P1 << std::endl;
-        
+
         cv::initUndistortRectifyMap(K0,distCoef0,R0,P0,image_size,CV_32F,M1l_,M2l_);
         cv::initUndistortRectifyMap(K1,distCoef1,R1,P1,image_size,CV_32F,M1r_,M2r_);
 
