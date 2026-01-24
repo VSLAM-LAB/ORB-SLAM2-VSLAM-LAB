@@ -351,6 +351,10 @@ void System::SaveKeyFrameTrajectoryVSLAMLAB(const string &filename)
     {
         KeyFrame* pKF = vpKFs[i];
 
+        if ((int(pKF->mnFrameId) % 50) != 0){
+            continue;
+        }
+
        // pKF->SetPose(pKF->GetPose()*Two);
 
         if(pKF->isBad())

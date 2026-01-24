@@ -1004,6 +1004,11 @@ bool Tracking::NeedNewKeyFrame()
     // Condition 2: Few tracked points compared to reference keyframe. Lots of visual odometry compared to map matches.
     const bool c2 = ((mnMatchesInliers<nRefMatches*thRefRatio|| bNeedToInsertClose) && mnMatchesInliers>15);
 
+    if  ((int(mCurrentFrame.mnId) % 50) == 0){
+        mpLocalMapper->InterruptBA();
+        return true;
+    }
+
     if((c1a||c1b||c1c)&&c2)
     {
         // If the mapping accepts keyframes, insert keyframe.

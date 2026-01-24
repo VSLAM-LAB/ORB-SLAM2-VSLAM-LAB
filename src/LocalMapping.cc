@@ -691,7 +691,8 @@ void LocalMapping::KeyFrameCulling()
         }  
 
         if(nRedundantObservations>0.9*nMPs)
-            pKF->SetBadFlag();
+            if ((int(pKF->mnFrameId) % 50) != 0)
+                pKF->SetBadFlag();
     }
 }
 
